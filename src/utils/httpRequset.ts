@@ -6,8 +6,12 @@ import * as TS from './defind'
 const url = 'https://eladmin.vip'
 
 const config = {
+  // 默认地址
   baseURL: url as string,
-  timeout: 3000 as number
+  // 设置超时时间
+  timeout: TS.RequestEnums.TIMEOUT as number,
+  // 跨域时候允许携带凭证
+  withCredentials: true
 }
 
 class httpRequest {

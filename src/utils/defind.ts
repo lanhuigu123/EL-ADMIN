@@ -35,3 +35,43 @@ interface Result {
 export interface ResultData<T> extends Result {
   data: T
 }
+
+export interface Login {
+  username: string
+  password: string
+  code: string
+  uuid: string
+  imgSrc: string
+}
+
+export interface LoginRequest {
+  code: string
+  password: string
+  username: string
+  uuid: string
+}
+
+export interface getTree {
+  pid?: number
+}
+
+export interface Response<T> {
+  content: T
+  totalElements: number
+}
+
+export interface GetDept {
+  page?: number
+  size?: number
+  pid?: number
+  sort?: string
+}
+
+export interface User {
+  id: number
+  date: string
+  name: string
+  address: string
+  hasChildren?: boolean
+  children?: User[]
+}

@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { getToken, removeToken } from './auth'
-import { ElLoading, ElMessageBox } from 'element-plus'
+import { ElMessageBox } from 'element-plus'
 import router from '@/router'
 import * as TS from './defind'
 const url = 'https://eladmin.vip'
@@ -20,7 +20,6 @@ class httpRequest {
     this.instance = axios.create(baseConfig)
     this.instance.interceptors.request.use(
       (config) => {
-        ElLoading.service({ fullscreen: false, text: '加载中...' })
         config.headers['Authorization'] = getToken()
         return config
       },
@@ -31,28 +30,29 @@ class httpRequest {
 
     this.instance.interceptors.response.use(
       (res: AxiosResponse) => {
-        const { data } = res
-        ElLoading.service({ fullscreen: false, text: '加载中...' })
-        if (data.msg.status === TS.RequestEnums.UNAUTHORIZED) {
+        const { data, status } = res
+        if (status === TS.RequestEnums.UNAUTHORIZED) {
           removeToken()
           router.replace('/login')
           return Promise.reject(data)
         }
-        return data
+        return res
       },
-      (err) => {
-        const { res } = err
+      (err: AxiosError) => {
+        const { response } = err
 
         let title = ''
         let message = ''
 
-        if (err && res) {
-          message = res.statusText
+        if (err && response) {
+          message = response.statusText
 
-          if (res.status === TS.RequestEnums.UNAUTHORIZED) {
-            router.replace('/login')
+          if (response.status === TS.RequestEnums.UNAUTHORIZED) {
+            router.replace({
+              name: 'Login'
+            })
           }
-          switch (res.status) {
+          switch (response.status) {
             case TS.RequestEnums.BADREQUEST:
               title = '错误请求'
               break
@@ -66,7 +66,7 @@ class httpRequest {
               title = '内部服务器错误'
               break
             default:
-              title = res.status.toString()
+              title = response.status.toString()
           }
           return ElMessageBox.alert(message, title, {
             confirmButtonText: 'OK',
@@ -83,23 +83,23 @@ class httpRequest {
   }
 
   public adUrl(url: string) {
-    console.log(process.env.VUE_APP_BASE_API, 'process')
+    // console.log(process.env.VUE_APP_BASE_API, 'process')
     return !process.env.VUE_APP_BASE_API ? url : process.env.VUE_APP_BASE_API + url
   }
 
-  get<T>(url: string, params?: object): Promise<TS.ResultData<T>> {
+  get(url: string, params?: object) {
     return this.instance.get(this.adUrl(url), { params })
   }
 
-  post<T>(url: string, params?: object): Promise<TS.ResultData<T>> {
+  post(url: string, params?: object) {
     return this.instance.post(this.adUrl(url), params)
   }
 
-  put<T>(url: string, params?: object): Promise<TS.ResultData<T>> {
+  put(url: string, params?: object) {
     return this.instance.put(this.adUrl(url), params)
   }
 
-  delete<T>(url: string, params?: object): Promise<TS.ResultData<T>> {
+  delete(url: string, params?: object) {
     return this.instance.delete(this.adUrl(url), { params })
   }
 }
